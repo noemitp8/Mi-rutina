@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Mi Rutina · Fuerza &amp; Glúteo</title>
+<style>
+  :root{
+    --bg: #f2f0eb;
+    --surface: #ffffff;
+    --surface-alt: #eae7e0;
+    --border: #dcd8cf;
+    --text: #2c2a26;
+    --muted: #8b8778;
+    --lower: #a9695f;
+    --lower-soft: rgba(169,105,95,0.12);
+    --upper: #6c8b83;
+    --upper-soft: rgba(108,139,131,0.12);
+    --hiit: #b08a4e;
+    --hiit-soft: rgba(176,138,78,0.12);
+    --cardio: #7c8a63;
+    --cardio-soft: rgba(124,138,99,0.12);
+    --info: #7d7668;
+    --info-soft: rgba(125,118,104,0.12);
+  }
+
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html,body{
+    margin:0; padding:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app{ max-width: 640px; margin: 0 auto; padding-bottom: 60px; }
+
+  header.top{
+    position: sticky; top:0; z-index: 10;
+    background: linear-gradient(180deg, var(--bg) 75%, rgba(242,240,235,0));
+    padding: 18px 18px 6px;
+  }
+
+  .eyebrow{
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; margin: 0 0 4px;
+  }
+
+  h1{
+    font-size: 24px; letter-spacing: -0.3px; font-weight: 800;
+    margin: 0 0 14px; text-transform: uppercase; color: var(--text);
+  }
+
+  nav.days{
+    display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px;
+    scrollbar-width: none;
+  }
+  nav.days::-webkit-scrollbar{ display:none; }
+
+  .tab{
+    flex: 0 0 auto;
+    padding: 9px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 13px; font-weight: 700;
+    display:flex; align-items:center; gap:7px;
+    cursor: pointer; white-space: nowrap;
+    transition: all .15s ease;
+  }
+  .tab .dot{ width:7px; height:7px; border-radius:50%; background: var(--muted); }
+  .tab[data-type="lower"].active{ background: var(--lower-soft); color: var(--lower); border-color: var(--lower); }
+  .tab[data-type="lower"].active .dot{ background: var(--lower); }
+  .tab[data-type="upper"].active{ background: var(--upper-soft); color: var(--upper); border-color: var(--upper); }
+  .tab[data-type="upper"].active .dot{ background: var(--upper); }
+  .tab[data-type="hiit"].active{ background: var(--hiit-soft); color: var(--hiit); border-color: var(--hiit); }
+  .tab[data-type="hiit"].active .dot{ background: var(--hiit); }
+  .tab[data-type="cardio"].active{ background: var(--cardio-soft); color: var(--cardio); border-color: var(--cardio); }
+  .tab[data-type="cardio"].active .dot{ background: var(--cardio); }
+  .tab[data-type="info"].active{ background: var(--info-soft); color: var(--info); border-color: var(--info); }
+  .tab[data-type="info"].active .dot{ background: var(--info); }
+
+  main{ padding: 4px 18px 0; }
+
+  .panel{ display:none; animation: fade .2s ease; }
+  .panel.active{ display:block; }
+  @keyframes fade{ from{opacity:0; transform: translateY(4px);} to{opacity:1; transform:none;} }
+
+  .day-head{ display:flex; align-items: baseline; gap:10px; margin: 10px 0 16px; }
+  .day-num{ font-size: 32px; font-weight: 800; line-height:1; color: var(--text); }
+  .day-name{ font-size: 15px; color: var(--muted); font-weight:600; }
+
+  .section-label{
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; margin: 22px 0 10px;
+  }
+
+  .card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 14px;
+    margin-bottom: 10px;
+  }
+
+  .ex-top{ display:flex; justify-content: space-between; align-items:flex-start; gap: 10px; }
+  .ex-name{ font-size: 15.5px; font-weight: 700; }
+  .ex-meta{ font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .ex-tip{ font-size: 12.5px; color: var(--text); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); line-height: 1.5; }
+  .ex-tip b{ color: var(--muted); font-weight: 700; }
+
+  .rest-pill{
+    flex: 0 0 auto;
+    font-size: 12.5px; font-weight: 700;
+    padding: 6px 10px; border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-alt);
+    cursor: pointer; user-select: none;
+    min-width: 58px; text-align:center;
+    color: var(--text);
+  }
+  .rest-pill.running{ color: #fff; }
+  .rest-pill.done{ animation: pulse .6s ease 2; }
+  @keyframes pulse{ 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.08);} }
+
+  .lower .rest-pill.running{ background: var(--lower); border-color: var(--lower); }
+  .upper .rest-pill.running{ background: var(--upper); border-color: var(--upper); }
+  .hiit .rest-pill.running{ background: var(--hiit); border-color: var(--hiit); }
+  .cardio .rest-pill.running{ background: var(--cardio); border-color: var(--cardio); }
+
+  .checks{ display:flex; gap: 7px; margin-top: 12px; }
+  .chk{
+    width: 30px; height: 30px; border-radius: 8px;
+    border: 1.5px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 13px; color: var(--muted); cursor:pointer;
+    transition: all .12s ease;
+  }
+  .lower .chk.on{ background: var(--lower); border-color: var(--lower); color:#fff; }
+  .upper .chk.on{ background: var(--upper); border-color: var(--upper); color:#fff; }
+  .hiit .chk.on{ background: var(--hiit); border-color: var(--hiit); color:#fff; }
+  .cardio .chk.on{ background: var(--cardio); border-color: var(--cardio); color:#fff; }
+
+  .intensity{ display:inline-block; font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+
+  .emom-box{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px; margin-bottom: 10px;
+  }
+  .emom-title{ font-weight: 800; font-size: 15px; margin-bottom: 8px; }
+  .emom-list{ margin:0; padding-left: 18px; color: var(--text); font-size: 14.5px; line-height: 1.9; }
+  .emom-note{ color: var(--muted); font-size: 12.5px; margin-top: 8px; }
+
+  .stretch-item{
+    display:flex; justify-content: space-between; align-items:center;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .stretch-item:last-child{ border-bottom:none; }
+  .stretch-time{ color: var(--muted); font-size: 12.5px; font-weight: 600; }
+
+  .note-box{
+    background: var(--surface-alt); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px; margin-top: 22px; font-size: 13px;
+    color: var(--muted); line-height: 1.6;
+  }
+  .note-box b{ color: var(--text); }
+
+  .phase{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px; margin-bottom: 10px;
+  }
+  .phase-title{ font-weight: 800; font-size: 14.5px; margin-bottom: 4px; color: var(--text); }
+  .phase-days{ font-size: 11.5px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .phase-text{ font-size: 13.5px; line-height: 1.55; color: var(--text); }
+
+  footer{ text-align:center; color: var(--muted); font-size: 11.5px; padding: 26px 18px 10px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <p class="eyebrow">Rutina personal</p>
+    <h1>Fuerza &amp; Glúteo</h1>
+    <nav class="days" id="tabs"></nav>
+  </header>
+
+  <main id="panels"></main>
+
+  <footer>Toca los círculos para marcar series · toca el descanso para iniciar el contador</footer>
+</div>
+
+<script>
+const DATA = [
+  {
+    id:'d1', num:1, type:'lower', name:'Lower A',
+    exercises:[
+      {name:'Hip Thrust', meta:'4 x 4-6', rest:120, tip:'Empuja con los talones y aprieta el glúteo arriba, sin arquear la zona lumbar.'},
+      {name:'Peso muerto rumano', meta:'3 x 6-8', rest:180, tip:'Rodilla ligeramente flexionada y fija, la barra roza las piernas, espalda neutra todo el recorrido.'},
+      {name:'Step up unilateral', meta:'3 x 10-12 (cada pierna)', rest:90, tip:'Empuja con el talón de la pierna de arriba, evita impulsarte con la de abajo.'},
+      {name:'Curl de femoral', meta:'3 x 10', rest:90, tip:'Controla la bajada (fase excéntrica) durante 2-3 segundos.'},
+      {name:'Gemelos', meta:'3 x 15', rest:75, tip:'Sube hasta arriba del todo y baja con control, rango completo de movimiento.'},
+    ],
+    stretches:[
+      {name:'Cuádriceps de pie', time:'30" c/lado'},
+      {name:'Glúteo (figura 4) tumbada', time:'30" c/lado'},
+      {name:'Isquiotibiales sentada', time:'30" c/lado'},
+      {name:'Gemelo contra pared', time:'30" c/lado'},
+    ]
+  },
+  {
+    id:'d2', num:2, type:'upper', name:'Upper A',
+    exercises:[
+      {name:'Dominadas asistidas', meta:'3 x 8-10', rest:120, note:'RIR 2-3, no al fallo', tip:'Baja los hombros (escápulas atrás y abajo) antes de tirar, evita balancearte.'},
+      {name:'Jalón al pecho', meta:'3 x 10-12', rest:90, note:'RIR 2', tip:'Lleva los codos hacia las caderas, pecho arriba.'},
+      {name:'Press inclinado', meta:'3 x 10', rest:90, note:'RIR 2', tip:'Muñecas rectas, baja controlado hasta la parte alta del pecho.'},
+      {name:'Elevaciones laterales', meta:'3 x 12-15', rest:75, note:'RIR 1-2', tip:'Codos ligeramente flexionados, sube hasta la altura del hombro sin encoger el trapecio.'},
+      {name:'Bíceps martillo', meta:'3 x 15', rest:75, note:'RIR 1-2', tip:'Codos pegados al cuerpo, sin balancear el tronco.'},
+    ],
+    core:[
+      {name:'Plancha frontal', meta:'3 x 30-45"', tip:'Cadera alineada con el resto del cuerpo, ni arriba ni caída.'},
+      {name:'Dead bug', meta:'3 x 10 (cada lado)', tip:'La zona lumbar se mantiene pegada al suelo en todo momento.'},
+    ],
+    stretches:[
+      {name:'Dorsal (colgado o en puerta)', time:'30"'},
+      {name:'Pecho en marco de puerta', time:'30" c/lado'},
+      {name:'Hombro cruzado (posterior)', time:'30" c/lado'},
+      {name:'Bíceps brazo extendido en pared', time:'20" c/lado'},
+    ]
+  },
+  {
+    id:'d3', num:3, type:'hiit', name:'HIIT',
+    emom:{
+      title:'EMOM x5 (1 minuto cada ejercicio, 5 rondas · ~20 min)',
+      items:[
+        'Burpees (8) · aterriza suave, prioriza técnica sobre velocidad',
+        'Jumping jacks (12) · core activado, rodillas suaves al aterrizar',
+        'Sentadilla con salto (8) · amortigua flexionando cadera y rodilla',
+        'Flexiones (6) · cuerpo en línea recta, apoya rodillas si hace falta'
+      ],
+      note:'Al terminar cada minuto, descansa lo que sobre hasta el siguiente.'
+    },
+    stretches:[
+      {name:'Cadera: zancada con rotación', time:'30" c/lado'},
+      {name:'Hombro: círculos + cruzado', time:'30"'},
+      {name:'Gemelo y sóleo', time:'20" c/lado'},
+      {name:'Respiración / vuelta a la calma', time:'1-2 min'},
+    ]
+  },
+  {
+    id:'d4', num:4, type:'lower', name:'Lower B',
+    exercises:[
+      {name:'Sentadilla', meta:'4 x 4-6', rest:180, tip:'Rodillas en línea con los pies, pecho arriba, baja hasta donde controles la técnica.'},
+      {name:'Extensión de cuádriceps', meta:'3 x 8-12', rest:120, tip:'Controla la bajada, no bloquees la rodilla con fuerza arriba.'},
+      {name:'Curl nórdico', meta:'3 x 5', rest:75, tip:'Ayúdate con las manos al bajar, progresión gradual sin forzar.'},
+      {name:'Aductor', meta:'2 x 15-20', rest:75, tip:'Movimiento controlado, sin usar impulso.'},
+      {name:'Abductor', meta:'3 x 15-20', rest:75, tip:'Empuja con la parte lateral de la cadera, tronco estable.'},
+    ],
+    stretches:[
+      {name:'Cuádriceps de pie', time:'30" c/lado'},
+      {name:'Aductores (mariposa o sentadilla profunda)', time:'30-45"'},
+      {name:'Glúteo (figura 4)', time:'30" c/lado'},
+      {name:'Lumbar (rodillas al pecho)', time:'30-45"'},
+    ]
+  },
+  {
+    id:'d5', num:5, type:'upper', name:'Upper B',
+    exercises:[
+      {name:'Press banca', meta:'3 x 8-10', rest:120, note:'RIR 2-3, no al fallo', tip:'Escápulas retraídas, pies firmes en el suelo, barra a la altura del pecho medio.'},
+      {name:'Press militar', meta:'3 x 10-12', rest:90, note:'RIR 2', tip:'Aprieta glúteo y abdomen para no arquear la zona lumbar.'},
+      {name:'Remo en barra o T', meta:'3 x 10-12', rest:90, note:'RIR 2', tip:'Lleva el codo hacia atrás, aprieta la espalda al final del recorrido.'},
+      {name:'Face pull', meta:'3 x 20', rest:75, note:'RIR 1-2', tip:'Tira hacia la cara y rota los hombros hacia fuera al final.'},
+      {name:'Extensión de tríceps o fondos', meta:'3 x 15', rest:75, note:'RIR 1-2', tip:'Codos pegados al cuerpo, evita abrir mucho los hombros.'},
+    ],
+    core:[
+      {name:'Elevación de piernas colgada o en banco', meta:'3 x 10-12', tip:'Evita balancear el cuerpo, controla la bajada.'},
+      {name:'Pallof press', meta:'3 x 10 (cada lado)', tip:'Resiste la rotación del tronco, core activado.'},
+    ],
+    stretches:[
+      {name:'Pecho en pared', time:'30" c/lado'},
+      {name:'Hombro / tríceps por detrás de la cabeza', time:'20" c/lado'},
+      {name:'Espalda alta (abrazo + redondeo)', time:'30"'},
+      {name:'Trapecio (inclinación lateral de cuello)', time:'20" c/lado'},
+    ]
+  },
+  {
+    id:'d6', num:6, type:'cardio', name:'Cardio Z2',
+    cardioNote:'30-40 min de actividad suave y disfrutable (pádel, bici, caminata rápida...). Debes poder mantener una conversación sin ahogarte.',
+    stretches:[
+      {name:'Estiramiento general de cuerpo completo', time:'5-8 min'},
+      {name:'Cuádriceps, isquios, gemelo, cadera', time:'suave, sin rebotes'},
+    ]
+  },
+  {
+    id:'d7', num:7, type:'info', name:'Ciclo & consejos',
+    isInfo: true
+  },
+];
+
+function fmtTime(s){
+  const m = Math.floor(s/60), sec = s%60;
+  return m + ':' + String(sec).padStart(2,'0');
+}
+
+function buildExerciseCard(type, ex){
+  const nSets = parseInt(ex.meta) || 3;
+  let checks = '';
+  for(let i=0;i<nSets;i++){ checks += `<div class="chk" data-i="${i}">${i+1}</div>`; }
+  return `
+  <div class="card ${type}">
+    <div class="ex-top">
+      <div>
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-meta">${ex.meta}</div>
+        ${ex.note ? `<span class="intensity">${ex.note}</span>` : ''}
+      </div>
+      <div class="rest-pill" data-rest="${ex.rest}" data-base="${fmtTime(ex.rest)}">${fmtTime(ex.rest)}</div>
+    </div>
+    <div class="checks">${checks}</div>
+    ${ex.tip ? `<div class="ex-tip"><b>Consejo:</b> ${ex.tip}</div>` : ''}
+  </div>`;
+}
+
+function buildCoreCard(type, ex){
+  return `
+  <div class="card ${type}">
+    <div class="ex-top">
+      <div>
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-meta">${ex.meta}</div>
+      </div>
+    </div>
+    ${ex.tip ? `<div class="ex-tip"><b>Consejo:</b> ${ex.tip}</div>` : ''}
+  </div>`;
+}
+
+function buildInfoPanel(){
+  return `
+  <div class="day-head"><span class="day-num">Ciclo</span><span class="day-name">Adaptar el entreno según la fase</span></div>
+
+  <div class="phase">
+    <div class="phase-title">Menstrual</div>
+    <div class="phase-days">Días 1 - 5 aprox.</div>
+    <div class="phase-text">Es normal sentir más cansancio, menos ganas o molestias. Está bien bajar el peso, priorizar técnica sobre carga, subir el RIR (dejar más margen), o cambiar el HIIT por cardio suave si el cuerpo lo pide. Si puedes, mueve aquí tu día de descanso.</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-title">Folicular</div>
+    <div class="phase-days">Después de la regla, hasta la ovulación</div>
+    <div class="phase-text">Suele ser la fase de más energía y mejor recuperación. Buen momento para las cargas más altas (Sentadilla, RDL, Press banca) y para intentar progresar en peso o repeticiones.</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-title">Ovulación</div>
+    <div class="phase-days">A mitad de ciclo aprox.</div>
+    <div class="phase-text">Energía alta, pero algunas mujeres notan más laxitud articular estos días. Cuida especialmente la técnica en sentadilla, hip thrust y RDL, sin necesidad de bajar la intensidad si te encuentras bien.</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-title">Lútea</div>
+    <div class="phase-days">Antes de la próxima regla</div>
+    <div class="phase-text">El rendimiento y la energía pueden bajar un poco, y es normal. Ajusta el RIR sin culpa, prioriza terminar la sesión aunque sea con menos peso, y cuida el descanso y la hidratación.</div>
+  </div>
+
+  <div class="note-box">
+    <b>Esto es orientativo.</b> Cada ciclo y cada cuerpo son distintos: usa estas fases como referencia general, no como regla fija. Escúchate y ajusta la tabla según cómo te encuentres cada día. Si tienes dolor intenso, sangrado muy abundante u otros síntomas que te preocupan, coméntalo con tu ginecólogo/a.
+  </div>
+
+  <div class="section-label">Consejos generales de técnica</div>
+  <div class="card">
+    <div class="stretch-item"><span>Calienta 5-10 min antes de la carga (movilidad + series ligeras de aproximación)</span></div>
+    <div class="stretch-item"><span>Respira: exhala en el esfuerzo, inhala al bajar</span></div>
+    <div class="stretch-item"><span>La técnica manda sobre el peso: si la pierdes, baja la carga</span></div>
+    <div class="stretch-item"><span>El RIR (repeticiones en reserva) es cuántas reps más podrías hacer antes de fallar</span></div>
+  </div>
+  `;
+}
+
+function buildDay(day){
+  if(day.isInfo){ return buildInfoPanel(); }
+
+  let html = `<div class="day-head"><span class="day-num">0${day.num}</span><span class="day-name">${day.name}</span></div>`;
+
+  if(day.emom){
+    html += `<div class="emom-box ${day.type}">
+      <div class="emom-title">${day.emom.title}</div>
+      <ol class="emom-list">${day.emom.items.map(i=>`<li>${i}</li>`).join('')}</ol>
+      <div class="emom-note">${day.emom.note}</div>
+    </div>`;
+  }
+
+  if(day.cardioNote){
+    html += `<div class="emom-box ${day.type}"><div class="emom-title">Indicaciones</div><div class="emom-note" style="font-size:14px;color:var(--text)">${day.cardioNote}</div></div>`;
+  }
+
+  if(day.exercises){
+    html += `<div class="section-label">Ejercicios</div>`;
+    day.exercises.forEach(ex => html += buildExerciseCard(day.type, ex));
+  }
+
+  if(day.core){
+    html += `<div class="section-label">Core</div>`;
+    day.core.forEach(ex => html += buildCoreCard(day.type, ex));
+  }
+
+  html += `<div class="section-label">Estiramientos</div><div class="card">`;
+  day.stretches.forEach(s => {
+    html += `<div class="stretch-item"><span>${s.name}</span><span class="stretch-time">${s.time}</span></div>`;
+  });
+  html += `</div>`;
+
+  return html;
+}
+
+const tabsEl = document.getElementById('tabs');
+const panelsEl = document.getElementById('panels');
+
+DATA.forEach((day, i) => {
+  const tab = document.createElement('div');
+  tab.className = 'tab' + (i===0 ? ' active':'');
+  tab.dataset.type = day.type;
+  tab.dataset.target = day.id;
+  tab.innerHTML = day.isInfo ? `<span class="dot"></span> Ciclo` : `<span class="dot"></span> D${day.num}`;
+  tab.addEventListener('click', () => selectDay(day.id));
+  tabsEl.appendChild(tab);
+
+  const panel = document.createElement('div');
+  panel.className = 'panel' + (i===0 ? ' active':'');
+  panel.id = day.id;
+  panel.innerHTML = buildDay(day);
+  panelsEl.appendChild(panel);
+});
+
+function selectDay(id){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.target === id));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === id));
+}
+
+panelsEl.addEventListener('click', (e) => {
+  const chk = e.target.closest('.chk');
+  if(chk){ chk.classList.toggle('on'); }
+});
+
+const timers = new WeakMap();
+
+panelsEl.addEventListener('click', (e) => {
+  const pill = e.target.closest('.rest-pill');
+  if(!pill) return;
+
+  if(timers.has(pill)){
+    clearInterval(timers.get(pill));
+    timers.delete(pill);
+    pill.classList.remove('running');
+    pill.textContent = pill.dataset.base;
+    return;
+  }
+
+  let remaining = parseInt(pill.dataset.rest);
+  pill.classList.add('running');
+  pill.textContent = fmtTime(remaining);
+
+  const interval = setInterval(() => {
+    remaining--;
+    if(remaining <= 0){
+      clearInterval(interval);
+      timers.delete(pill);
+      pill.classList.remove('running');
+      pill.classList.add('done');
+      pill.textContent = '¡Listo!';
+      setTimeout(() => {
+        pill.classList.remove('done');
+        pill.textContent = pill.dataset.base;
+      }, 1800);
+      return;
+    }
+    pill.textContent = fmtTime(remaining);
+  }, 1000);
+
+  timers.set(pill, interval);
+});
+</script>
+</body>
+</html>
